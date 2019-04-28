@@ -1,7 +1,6 @@
-from parsik import logutils
-
 from copy import copy
 import logging
+from parsik import logutils
 import re
 
 logger = logging.getLogger(__name__)
