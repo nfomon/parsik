@@ -19,7 +19,7 @@ recommend parsy (https://github.com/python-parsy/parsy).
 ## Example
 
 ```python
-import parsik
+from parsik import *
 
 # A grammar for 7- or 10-digit phone numbers.
 grammar = {
