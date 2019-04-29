@@ -81,7 +81,7 @@ class Fail(Matcher):
 
     You can even use the Fail with no children, indicating that the parse
     attempt should terminate unconditionally if it reaches that point in the
-    grammar.  Example:  Sequence(Char('a'), Char('b'), Fail())
+    grammar.  Example:  Any(Char('b'), Fail(on_fail=missing_b_failure))
     """
 
     def __init__(self, child=None, on_fail=None):
