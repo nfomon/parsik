@@ -21,102 +21,6 @@ class TestParsik(unittest.TestCase):
         output = self.parse(grammar, s)
         self.assertEqual(output, expected_output)
 
-    def test_EOF(self):
-        g = {
-          'A': EOF(),
-        }
-        self.good(g, '', None)
-        self.bad(g, 'x')
-        self.bad(g, 'xx')
-
-    def test_Char(self):
-        g = {
-          'A': Char('a'),
-        }
-        self.bad(g, '')
-        self.good(g, 'a', 'a')
-        self.bad(g, 'A')
-
-        g = {
-          'A': Char('aa'),
-        }
-        self.bad(g, '')
-        self.bad(g, 'a')
-        self.bad(g, 'aa')
-
-        g = {
-          'A': Char(''),
-        }
-        self.bad(g, '')
-        self.bad(g, 'a')
-        self.bad(g, 'aa')
-
-        g = {
-          'A': Char(None),
-        }
-        self.bad(g, '')
-        self.bad(g, 'a')
-        self.bad(g, 'aa')
-
-    def test_Fail(self):
-        self.f = False
-        def faily(dociter):
-            self.f = True
-        g = {
-          'A': Fail(on_fail=faily),
-        }
-        self.bad(g, '')
-        self.assertTrue(self.f)
-        self.f = False
-        self.bad(g, 'x')
-        self.assertTrue(self.f)
-
-        self.f = False
-        g = {
-          'A': Any(Char('a'), Fail(on_fail=faily)),
-        }
-        self.bad(g, '')
-        self.assertTrue(self.f)
-        self.f = False
-        self.bad(g, 'x')
-        self.assertTrue(self.f)
-        self.f = False
-        self.good(g, 'a', 'a')
-        self.assertFalse(self.f)
-
-    def test_silent(self):
-        g = {
-          'A': silent(Char('a')),
-        }
-        self.bad(g, '')
-        self.good(g, 'a', None)
-        self.bad(g, 'x')
-
-        g = {
-          'A': silent(Sequence(Char('a'), Char('b'), Char('c'))),
-        }
-        self.bad(g, '')
-        self.bad(g, 'a')
-        self.bad(g, 'ab')
-        self.good(g, 'abc', None)
-        self.bad(g, 'abcd')
-        self.bad(g, 'x')
-
-    def test_Regex(self):
-        g = {
-          'A': Regex(r'[1-3]+'),
-        }
-        self.bad(g, '')
-        self.bad(g, '0')
-        self.bad(g, 'x')
-        self.good(g, '1', '1')
-        self.good(g, '2', '2')
-        self.good(g, '3', '3')
-        self.good(g, '11', '11')
-        self.good(g, '31211323', '31211323')
-        self.bad(g, '4')
-        self.bad(g, '1234')
-
     def test_Any(self):
         self.f = False
         def faily(dociter):
@@ -189,6 +93,152 @@ class TestParsik(unittest.TestCase):
         self.good(g, 'ac', ['a', 'c'])
         self.bad(g, 'abc')
         self.bad(g, 'acb')
+
+    def test_Char(self):
+        g = {
+          'A': Char('a'),
+        }
+        self.bad(g, '')
+        self.good(g, 'a', 'a')
+        self.bad(g, 'A')
+
+        g = {
+          'A': Char('aa'),
+        }
+        self.bad(g, '')
+        self.bad(g, 'a')
+        self.bad(g, 'aa')
+
+        g = {
+          'A': Char(''),
+        }
+        self.bad(g, '')
+        self.bad(g, 'a')
+        self.bad(g, 'aa')
+
+        g = {
+          'A': Char(None),
+        }
+        self.bad(g, '')
+        self.bad(g, 'a')
+        self.bad(g, 'aa')
+
+    def test_EOF(self):
+        g = {
+          'A': EOF(),
+        }
+        self.good(g, '', None)
+        self.bad(g, 'x')
+        self.bad(g, 'xx')
+
+    def test_Fail(self):
+        self.f = False
+        def faily(dociter):
+            self.f = True
+        g = {
+          'A': Fail(on_fail=faily),
+        }
+        self.bad(g, '')
+        self.assertTrue(self.f)
+        self.f = False
+        self.bad(g, 'x')
+        self.assertTrue(self.f)
+
+        self.f = False
+        g = {
+          'A': Any(Char('a'), Fail(on_fail=faily)),
+        }
+        self.bad(g, '')
+        self.assertTrue(self.f)
+        self.f = False
+        self.bad(g, 'x')
+        self.assertTrue(self.f)
+        self.f = False
+        self.good(g, 'a', 'a')
+        self.assertFalse(self.f)
+
+    def test_Optional(self):
+        g = {
+          'A': Optional(Char('a')),
+        }
+        self.good(g, '', None)
+        self.good(g, 'a', 'a')
+        self.bad(g, 'x')
+
+        g = {
+          'A': Optional(ZeroOrMore(Char('a'))),
+        }
+        self.good(g, '', [])
+        self.good(g, 'a', ['a'])
+        self.bad(g, 'x')
+
+        g = {
+          'A': Optional(OneOrMore(Char('a'))),
+        }
+        self.good(g, '', None)
+        self.good(g, 'a', ['a'])
+        self.bad(g, 'x')
+
+        g = {
+          'A': Optional(Times(Char('a'), 2)),
+        }
+        self.good(g, '', None)
+        self.bad(g, 'a')
+        self.good(g, 'aa', ['a']*2)
+        self.good(g, 'aaa', ['a']*3)
+        self.good(g, 'aaaa', ['a']*4)
+        self.bad(g, 'b')
+        self.bad(g, 'ab')
+        self.bad(g, 'aab')
+        self.bad(g, 'aaab')
+
+        g = {
+          'A': Optional(Times(Char('a'), 3)),
+        }
+        self.good(g, '', None)
+        self.bad(g, 'a')
+        self.bad(g, 'aa')
+        self.good(g, 'aaa', ['a']*3)
+        self.good(g, 'aaaa', ['a']*4)
+        self.bad(g, 'b')
+        self.bad(g, 'ab')
+        self.bad(g, 'aab')
+        self.bad(g, 'aaab')
+
+    def test_R(self):
+        g = {
+          'A': R('B'),
+          'B': Char('b'),
+        }
+        self.bad(g, '')
+        self.bad(g, 'a')
+        self.good(g, 'b', 'b')
+        self.bad(g, 'x')
+
+    def test_R_str(self):
+        g = {
+          'A': 'B',
+          'B': Char('b'),
+        }
+        self.bad(g, '')
+        self.bad(g, 'a')
+        self.good(g, 'b', 'b')
+        self.bad(g, 'x')
+
+    def test_Regex(self):
+        g = {
+          'A': Regex(r'[1-3]+'),
+        }
+        self.bad(g, '')
+        self.bad(g, '0')
+        self.bad(g, 'x')
+        self.good(g, '1', '1')
+        self.good(g, '2', '2')
+        self.good(g, '3', '3')
+        self.good(g, '11', '11')
+        self.good(g, '31211323', '31211323')
+        self.bad(g, '4')
+        self.bad(g, '1234')
 
     def test_Sequence(self):
         g = {
@@ -419,72 +469,22 @@ class TestParsik(unittest.TestCase):
         self.good(g, 'aaaa', ['a'] * 4)
         self.good(g, 'aaaaa', ['a'] * 5)
 
-    def test_Optional(self):
+    def test_silent(self):
         g = {
-          'A': Optional(Char('a')),
+          'A': silent(Char('a')),
         }
-        self.good(g, '', None)
-        self.good(g, 'a', 'a')
+        self.bad(g, '')
+        self.good(g, 'a', None)
         self.bad(g, 'x')
 
         g = {
-          'A': Optional(ZeroOrMore(Char('a'))),
-        }
-        self.good(g, '', [])
-        self.good(g, 'a', ['a'])
-        self.bad(g, 'x')
-
-        g = {
-          'A': Optional(OneOrMore(Char('a'))),
-        }
-        self.good(g, '', None)
-        self.good(g, 'a', ['a'])
-        self.bad(g, 'x')
-
-        g = {
-          'A': Optional(Times(Char('a'), 2)),
-        }
-        self.good(g, '', None)
-        self.bad(g, 'a')
-        self.good(g, 'aa', ['a']*2)
-        self.good(g, 'aaa', ['a']*3)
-        self.good(g, 'aaaa', ['a']*4)
-        self.bad(g, 'b')
-        self.bad(g, 'ab')
-        self.bad(g, 'aab')
-        self.bad(g, 'aaab')
-
-        g = {
-          'A': Optional(Times(Char('a'), 3)),
-        }
-        self.good(g, '', None)
-        self.bad(g, 'a')
-        self.bad(g, 'aa')
-        self.good(g, 'aaa', ['a']*3)
-        self.good(g, 'aaaa', ['a']*4)
-        self.bad(g, 'b')
-        self.bad(g, 'ab')
-        self.bad(g, 'aab')
-        self.bad(g, 'aaab')
-
-    def test_R(self):
-        g = {
-          'A': R('B'),
-          'B': Char('b'),
+          'A': silent(Sequence(Char('a'), Char('b'), Char('c'))),
         }
         self.bad(g, '')
         self.bad(g, 'a')
-        self.good(g, 'b', 'b')
-        self.bad(g, 'x')
-
-    def test_R_str(self):
-        g = {
-          'A': 'B',
-          'B': Char('b'),
-        }
-        self.bad(g, '')
-        self.bad(g, 'a')
-        self.good(g, 'b', 'b')
+        self.bad(g, 'ab')
+        self.good(g, 'abc', None)
+        self.bad(g, 'abcd')
         self.bad(g, 'x')
 
     def test_phonenum(self):
