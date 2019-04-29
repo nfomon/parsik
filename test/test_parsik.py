@@ -3,7 +3,9 @@
 import logging
 import unittest
 
-from parsik import *
+from parsik import Parser, ParseError, ParseFailure,\
+                   Any, Char, EOF, Fail, OneOrMore, Optional, R,\
+                   Regex, Sequence, Times, ZeroOrMore, silent
 
 #logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
@@ -12,12 +14,11 @@ class TestParsik(unittest.TestCase):
         return Parser(grammar).parse('A', s)
 
     def bad(self, grammar, s):
-        success, output = self.parse(grammar, s)
-        self.assertFalse(success)
+        with self.assertRaises(ParseFailure):
+            output = self.parse(grammar, s)
 
     def good(self, grammar, s, expected_output):
-        success, output = self.parse(grammar, s)
-        self.assertTrue(success)
+        output = self.parse(grammar, s)
         self.assertEqual(output, expected_output)
 
     def test_EOF(self):
@@ -502,21 +503,17 @@ class TestParsik(unittest.TestCase):
         }
         parser = Parser(grammar, "Phone numbers")
 
-        success, output = parser.parse("PHONENUM", "123-4567")
-        assert success
+        output = parser.parse("PHONENUM", "123-4567")
         assert output == ['123', '4567']
 
-        success, output = parser.parse("PHONENUM", "(555) 123-4567")
-        assert success
+        output = parser.parse("PHONENUM", "(555) 123-4567")
         assert output == ['555', '123', '4567']
 
-        success, output = parser.parse("PHONENUM", "123-456")
-        assert not success
-        assert output is None
+        with self.assertRaises(ParseFailure):
+            parser.parse("PHONENUM", "123-456")
 
-        success, output = parser.parse("PHONENUM", "123-45678")
-        assert not success
-        assert output is None
+        with self.assertRaises(ParseFailure):
+            parser.parse("PHONENUM", "123-45678")
 
     def test_phonenum_str(self):
         # A grammar for 7- or 10-digit phone numbers.
@@ -534,21 +531,17 @@ class TestParsik(unittest.TestCase):
         }
         parser = Parser(grammar, "Phone numbers")
 
-        success, output = parser.parse("PHONENUM", "123-4567")
-        assert success
+        output = parser.parse("PHONENUM", "123-4567")
         assert output == ['123', '4567']
 
-        success, output = parser.parse("PHONENUM", "(555) 123-4567")
-        assert success
+        output = parser.parse("PHONENUM", "(555) 123-4567")
         assert output == ['555', '123', '4567']
 
-        success, output = parser.parse("PHONENUM", "123-456")
-        assert not success
-        assert output is None
+        with self.assertRaises(ParseFailure):
+            parser.parse("PHONENUM", "123-456")
 
-        success, output = parser.parse("PHONENUM", "123-45678")
-        assert not success
-        assert output is None
+        with self.assertRaises(ParseFailure):
+            parser.parse("PHONENUM", "123-45678")
 
     def test_quick_example(self):
         grammar = {
@@ -559,8 +552,7 @@ class TestParsik(unittest.TestCase):
         }
         p = Parser(grammar, "Quick example")
 
-        success, output = p.parse("MAIN", "abaa")
-        assert success
+        output = p.parse("MAIN", "abaa")
         assert output == [['a'], 'b', ['a', 'a']]
 
     def test_quick_example_2(self):
@@ -572,8 +564,7 @@ class TestParsik(unittest.TestCase):
         }
         p = Parser(grammar, "Quick example")
 
-        success, output = p.parse("MAIN", "ababy")
-        assert success
+        output = p.parse("MAIN", "ababy")
         assert output == [['ab', 'ab'], 'y', []]
 
 if __name__ == '__main__':

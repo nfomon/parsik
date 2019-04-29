@@ -28,7 +28,7 @@ Public classes:
 Public functions:
 - silent: a convenience to wrap a Matcher to make it provide no output.
 
-For writing your own Matchers, refer to the following classes from parsik.parsik:
+For writing your own Matchers, refer to the following classes from parsik.parser:
 - Matcher: base class for all Matchers; subclass this and add a _match method.
 - MatchResult: indicates the status of a match attempt.
   - MatchSuccess
@@ -36,8 +36,8 @@ For writing your own Matchers, refer to the following classes from parsik.parsik
 - DocumentIterator: iterator for the input string.
 """
 
-from parsik.parser import Parser, ParseError, R
-from parsik.matchers import Char, Regex, EOF, Optional, Any, Sequence,\
-                            Times, ZeroOrMore, OneOrMore, Fail, silent
+from parsik.parser import Parser, ParseError, ParseFailure
+from parsik.matchers import Any, Char, EOF, Fail, OneOrMore, Optional, R,\
+                            Regex, Sequence, Times, ZeroOrMore, silent
 
-__version__ = '0.9.2'
+__version__ = '0.9.3'

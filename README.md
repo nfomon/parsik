@@ -19,7 +19,9 @@ recommend parsy (https://github.com/python-parsy/parsy).
 ## Example
 
 ```python
-from parsik import *
+from parsik import Parser, ParseFailure,\
+                   Any, Char, EOF, Fail, OneOrMore, Optional, R,\
+                   Regex, Sequence, Times, ZeroOrMore, silent
 
 # A grammar for 7- or 10-digit phone numbers.
 grammar = {
@@ -36,17 +38,18 @@ grammar = {
 }
 parser = Parser(grammar, "Phone numbers")
 
-success, output = parser.parse("PHONENUM", "123-4567")
-assert success
+output = parser.parse("PHONENUM", "123-4567")
 assert output == [ '123', '4567']
 
-success, output = parser.parse("PHONENUM", "(555) 123-4567")
-assert success
+output = parser.parse("PHONENUM", "(555) 123-4567")
 assert output == [ '555', '123', '4567']
 
-success, output = parser.parse("PHONENUM", "123-456")
-assert not success
-assert output is None
+try:
+    parser.parse("PHONENUM", "123-456")
+except ParseFailure:
+    pass
+else:
+    assert False
 ```
 
 
@@ -98,7 +101,7 @@ grammar = {
     'THIRD': 'FIRST',
 }
 p = Parser(grammar, "Quick example")
-success, output = p.parse("MAIN", "ababy")
+p.parse("MAIN", "ababy")
 ```
 
 This will log:

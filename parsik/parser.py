@@ -7,10 +7,6 @@ from parsik import logutils
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class ParseError(Exception):
-    """Indicates an attempt to use the parser incorrectly."""
-    pass
-
 class Parser:
     """Parses documents according to a grammar.
 
@@ -39,6 +35,7 @@ class Parser:
         optional and only used for logging.
         """
 
+        from parsik import R
         self.grammar = grammar
         self.name = name
         for rule_name, matcher in grammar.items():
@@ -54,8 +51,7 @@ class Parser:
     def parse(self, starting_rule, input_string):
         r"""Parse an input string against a specific rule in the grammar.
 
-        The starting_rule must be the name of a rule in the grammar; otherwise
-        a ParseError is raised.
+        Raises ParseError if the starting_rule is not in the grammar.
 
         If the input_string uses the CRLF ('\r\n') newline convention, it's
         recommended to combine these into a single linefeed ('\n') character as
@@ -63,10 +59,9 @@ class Parser:
         line-number logging will be off (because it tracks individual
         characters), and anyway this tends to simplify grammars.
 
-        Returns a 2-tuple.  If the parse was not successful (i.e. the input
-        string was not completely matched by the starting_rule), then it
-        returns (False, None).  If the parse was successful, it returns (True,
-        output), where the nature of the "output" is up to the Matchers.
+        Raises ParseFailure if the parse was unsuccessful.  Otherwise, returns
+        the output of the parse; the nature of this output is up to the
+        Matchers.
 
         Each Matcher has a default behaviour for its output. For example, the
         Char and Regex matchers will output strings corresponding to the
@@ -95,13 +90,21 @@ class Parser:
                 logger.info("Parse success: '%s'.",
                             logutils.squish(logutils.stringify(result.output), 60))
                 logger.info("")
-                return True, result.output
+                return result.output
         except TerminateParse:
             logger.info("Parse terminated.")
         else:
             logger.info("Parse failed.")
         logger.info("")
-        return False, None
+        raise ParseFailure()
+
+class ParseError(Exception):
+    """Indicates an attempt to use the parser incorrectly."""
+    pass
+
+class ParseFailure(Exception):
+    """Indicates that the document does not match the grammar."""
+    pass
 
 class ParseLogger:
     """Static helpers for logging nicely-formatted parse attempts."""
@@ -217,16 +220,16 @@ class MatchResult:
         """Indicates if the match was successful."""
         return isinstance(self, MatchSuccess)
 
+class MatchFailure(MatchResult):
+    """Indicates that a match did not succeed."""
+    pass
+
 class MatchSuccess(MatchResult):
     """A successful match; contains the endpoint iterator and match output."""
 
     def __init__(self, end_iter, output=None):
         self.end_iter = end_iter
         self.output = output
-
-class MatchFailure(MatchResult):
-    """Indicates that a match did not succeed."""
-    pass
 
 class TerminateParse(Exception):
     """Matchers can raise this to completely terminate a parse attempt."""
@@ -278,6 +281,7 @@ class Matcher:
         rules, we can provide those names to the matchers to help with logging.
         """
 
+        from parsik import R
         self.name = name
         for i, child in enumerate(self.children):
             if isinstance(child, str):
@@ -330,34 +334,3 @@ class Matcher:
         providing an on_match callback to the Matcher constructor.
         """
         raise NotImplementedError
-
-class R(Matcher):
-    """Matches a rule by name that is defined elsewhere in the grammar.
-
-    Example: grammar = {
-        'TOP': Sequence(R('A'), R('B')),
-        'A': ZeroOrMore(Char('a')),
-        'B': OneOrMore(Char('b')),
-    }
-
-    Generally you can just name the grammar rule as a string directly, without
-    needing to invoke R() explicitly.  For example:
-        'TOP': Sequence('A', 'B'),
-
-    Behind the scenes, that will use an R matcher anyway.  But if you want to
-    override the on_match function, then you will need to use the R() form.
-    """
-
-    def __init__(self, rule_name, on_match=lambda x: x):
-        super().__init__(on_match=on_match)
-        self.rule_name = rule_name
-
-    def prepare(self, grammar, name=None):
-        self.name = name
-        self.children = [grammar[self.rule_name]]
-
-    def _match(self, start_iter, depth):
-        return self.children[0].match(start_iter, depth)
-
-    def __str__(self):
-        return "{{{}}}".format(self.rule_name)
