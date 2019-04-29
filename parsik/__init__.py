@@ -36,8 +36,8 @@ For writing your own Matchers, refer to the following classes from parsik.parsik
 - DocumentIterator: iterator for the input string.
 """
 
-from parsik.parsik import Parser, ParseError, Char, Regex, EOF, R, Optional, Any,\
-                          Sequence, Times, ZeroOrMore, OneOrMore, Fail, silent
+from parsik.parser import Parser, ParseError, R
+from parsik.matchers import Char, Regex, EOF, Optional, Any, Sequence,\
+                            Times, ZeroOrMore, OneOrMore, Fail, silent
 
 __version__ = '0.9.1'
-

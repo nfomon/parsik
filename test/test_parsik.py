@@ -2,9 +2,10 @@
 
 import logging
 import unittest
+
 from parsik import *
 
-#logging.basicConfig(level=logging.DEBUG, format='%(message)s',)
+#logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 class TestParsik(unittest.TestCase):
     def parse(self, grammar, s):

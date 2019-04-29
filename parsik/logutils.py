@@ -1,10 +1,12 @@
 """Some generic logging helper utilities."""
 
 def indent(depth):
+    """Returns an amount of indentation whitespace to the provided depth."""
+
     return "  " * depth
 
 def squish(s, n):
-    """Cut out the middle of a string s so that it fits within length n."""
+    """Truncate the middle of a string s so that it fits within a length n."""
 
     if len(s) > n:
         if n > 30:
@@ -20,4 +22,3 @@ def stringify(x, sep=1):
         delim = ',' + (' ' * sep)
         return '[' + delim.join(stringify(y) for y in x) + ']'
     return str(x)
-

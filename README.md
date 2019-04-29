@@ -85,7 +85,7 @@ can also refer to other grammar rules by name, even if it forms a cycle.
 Parsik uses python's standard logging.  If you enable it at DEBUG level:
 
 ```
-logging.basicConfig(level=logging.DEBUG, format='%(message)s',)
+logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 ```
 
 then you'll get an elaborate analysis of any parse attempt.  For example:
