@@ -40,4 +40,4 @@ from parsik.parser import Parser, ParseError, R
 from parsik.matchers import Char, Regex, EOF, Optional, Any, Sequence,\
                             Times, ZeroOrMore, OneOrMore, Fail, silent
 
-__version__ = '0.9.1'
+__version__ = '0.9.2'

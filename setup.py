@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="parsik",
-    version="0.9.1",
+    version="0.9.2",
     author="Mike Biggs",
     author_email="nfomon@users.noreply.github.com",
     description="A minimalistic PEG parser",
