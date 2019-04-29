@@ -2,7 +2,6 @@
 
 def indent(depth):
     """Returns an amount of indentation whitespace to the provided depth."""
-
     return "  " * depth
 
 def squish(s, n):
