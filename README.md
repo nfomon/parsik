@@ -145,7 +145,7 @@ one line where the ✓|✕ column is blank, and another where it has the result.
 
 The columns are:
 - pos: The position(s) (character #s) in the input document under view.
-  - `$` means EOF.
+  - `$` means it has reached the end.
 - input: The text of the input document at those positions.
 - output: If a matcher was successful, this is its output.
 - ✓|✕:
