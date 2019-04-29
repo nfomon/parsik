@@ -1,4 +1,4 @@
-"""A simplistic PEG (parsing expression grammar) parser.
+"""Parsik: A simplistic PEG (parsing expression grammar) parser.
 
 You provide a grammar for your language, and you get a Parser that can
 recognize if documents (strings) match the grammar.  You can attach callback
